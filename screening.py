@@ -7,13 +7,15 @@ import yfinance as yf
 import pandas as pd
 import pandas_gbq
 import numpy as np
+import concurrent.futures
+import time
 
 # Initializing the Big Query client
 client = bigquery.Client()
 
 # Retrieve ticker list from BigQuery
 # Focus only on stocks listed on the Prime Market
-query = "SELECT Code FROM `my-project-1567934249798.finance.external_table_ticker_list` WHERE MarketCode = '0111' limit 10"
+query = "SELECT Code FROM `my-project-1567934249798.finance.external_table_ticker_list` WHERE MarketCode = '0111'"
 query_job = client.query(query)
 ticker_list = [row.Code for row in query_job.result()]
 
@@ -21,6 +23,8 @@ ticker_list = [row.Code for row in query_job.result()]
 # Define the function which retrieves fundamentals
 def get_financials(ticker):
     try:
+        # By introducing a delay of a few seconds for each request to yfinance, the load on the API is distributed
+        time.sleep(2)
         ticker = ticker[:-1]
         stock = yf.Ticker(ticker + '.T')  # Toobtain data on firms listed on the Tokyo Stock Exchange, you must add .T at the end
         info = stock.info
@@ -53,10 +57,15 @@ def get_financials(ticker):
 
 # Retrieve data using yfinance
 data_frames = []
-for ticker in ticker_list:
-    data = get_financials(ticker)
-    if data:
-        data_frames.append(data)
+
+# By reducing the number of requests sent simultaneously, we can lower the likelihood of hitting the API rate limit
+MAX_THREADS = 5
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+    # USE 'map' to apply the get_financials function to multiple tickers simultaneously
+    results = executor.map(get_financials, ticker_list)
+    # Exclude None from the results
+    data_frames = [data for data in results if data is not None]
 
 # transform into dataframe
 df = pd.DataFrame(data_frames)
@@ -70,9 +79,10 @@ df.loc[df['ROE'] > 8, 'Point'] += 10
 df.loc[df['ROA'] > 6, 'Point'] += 10
 df.loc[df['Quarter Growth'] > 0.10, 'Point'] += 10
 
-# Sort results
-df.sort_values('Point', ascending=False)
+# abstract stocks more than 50 points
+excellent_firms = df[df['Point'] >= 50]
+
 # Write data to BigQueery
 # If there is no table, save it as a new table. If there is a table, replace the data.
 table_id = 'my-project-1567934249798.finance.excellent_firms'
-pandas_gbq.to_gbq(df, table_id, project_id=client.project, if_exists='replace')
+pandas_gbq.to_gbq(excellent_firms, table_id, project_id=client.project, if_exists='replace')
