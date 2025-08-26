@@ -12,7 +12,7 @@ steps:
           --trigger-http \
           --project=my-project-1567934249798 \
           --service-account=${_SERVICE_ACCOUNT_FUNCTIONS} \
-          --build-service-account=projects/${PROJECT_ID}/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
+          --build-service-account=projects/my-project-1567934249798/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
           --allow-unauthenticated
 
 substitutions:
