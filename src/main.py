@@ -66,4 +66,4 @@ def fetch_stock_financials(request):
     final_df = pd.concat(dfs_to_concat, ignore_index=True)
 
     table_id = 'my-project-1567934249798.finance.firm_performance'
-    pandas_gbq.to_gbq(final_df, table_id, project_id=client.project, if_exists='replace')
+    pandas_gbq.to_gbq(final_df, table_id, project_id=client.project, if_exists='replace', credentials=client.credentials)
