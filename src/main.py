@@ -52,18 +52,24 @@ def fetch_stock_financials(request):
 
             # Remove rows containing NuLL values from the joined DataFrame
             firm_performance = firm_performance.dropna()
+            
             # Add an index (date) to the column.
             firm_performance = firm_performance.reset_index()
             firm_performance.rename(columns={'index': 'date'}, inplace=True)
+            
             # Delete time information using .dt.date
             firm_performance['date'] = firm_performance['date'].dt.date
+            
             # Add ticker and company name
             firm_performance.insert(0, 'ticker', ticker)
             firm_performance.insert(1, 'firm_name', stock.info.get('longName', 'N/A'))
+            
             # Add a new DataFrame to the list
             dfs_to_concat.append(firm_performance)
+            
         # Combine all DataFrames
         final_df = pd.concat(dfs_to_concat, ignore_index=True)
+        
         # Write on the BQ table
         table_id = 'my-project-1567934249798.finance.firm_performance'
         pandas_gbq.to_gbq(final_df, table_id, project_id=client.project, if_exists='replace')
