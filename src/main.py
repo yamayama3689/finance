@@ -15,6 +15,13 @@ def fetch_stock_financials(request):
     query = "SELECT Ticker FROM `my-project-1567934249798.finance.excellent_firms`"
     query_job = client.query(query)
     tickers = [row.Ticker for row in query_job.result()]
+    
+    # Define the default project ID and table ID
+    project_id = 'my-project-1567934249798'
+    table_id = f'{project_id}.finance.firm_performance'
+    
+    # Flag to overwrite the table with the first ticker
+    if_exists_mode = 'replace'
 
     # Retrieve the ticker list from the parameters
     # if not tickers or tickers == ['']:
@@ -59,11 +66,23 @@ def fetch_stock_financials(request):
         firm_performance.insert(0, 'ticker', ticker)
         firm_performance.insert(1, 'firm_name', stock.info.get('longName', 'N/A'))
 
-        # Add the new DataFrame to the list
-        dfs_to_concat.append(firm_performance)
+        # Write to BigQuery (overwrite on first execution, append thereafter)
+        pandas_gbq.to_gbq(
+            firm_performance,
+            table_id,
+            project_id=project_id,
+            if_exists=if_exists_mode,
+            credentials=client.credentials
+        )
+            
+        # Switch to append mode starting from the next loop
+        if_exists_mode = 'append'
+            
+        # # Add the new DataFrame to the list
+        # dfs_to_concat.append(firm_performance)
 
-    # Join all DataFrames
-    final_df = pd.concat(dfs_to_concat, ignore_index=True)
+    # # Join all DataFrames
+    # final_df = pd.concat(dfs_to_concat, ignore_index=True)
 
-    table_id = 'my-project-1567934249798.finance.firm_performance'
-    pandas_gbq.to_gbq(final_df, table_id, project_id=client.project, if_exists='replace', credentials=client.credentials)
+    # table_id = 'my-project-1567934249798.finance.firm_performance'
+    # pandas_gbq.to_gbq(final_df, table_id, project_id=client.project, if_exists='replace', credentials=client.credentials)
