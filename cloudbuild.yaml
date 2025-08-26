@@ -22,7 +22,7 @@ substitutions:
   _SERVICE_ACCOUNT_TRIGGER: "sa-deploy@${PROJECT_ID}.iam.gserviceaccount.com"
   _RUN_TIME: "python312"
 
-logsBucket: "finance_20250820"
+logsBucket: "gs://finance_20250820"
 serviceAccount: "projects/${PROJECT_ID}/serviceAccounts/sa-build@${PROJECT_ID}.iam.gserviceaccount.com"
 options:
   logging: GCS_ONLY
