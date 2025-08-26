@@ -10,7 +10,7 @@ steps:
           --source=src/ \
           --runtime=${_RUN_TIME} \
           --trigger-http \
-          --project=${PROJECT_ID} \
+          --project=my-project-1567934249798 \
           --service-account=${_SERVICE_ACCOUNT_FUNCTIONS} \
           --build-service-account=projects/${PROJECT_ID}/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
           --allow-unauthenticated
@@ -18,12 +18,12 @@ steps:
 substitutions:
   _FUNCTIONS_NAME: "fetch_stock_data"
   _REGION: "us-central1"
-  _SERVICE_ACCOUNT_FUNCTIONS: "sa-functions@${PROJECT_ID}.iam.gserviceaccount.com"
-  _SERVICE_ACCOUNT_TRIGGER: "sa-deploy@${PROJECT_ID}.iam.gserviceaccount.com"
+  _SERVICE_ACCOUNT_FUNCTIONS: "sa-functions@my-project-1567934249798.iam.gserviceaccount.com"
+  _SERVICE_ACCOUNT_TRIGGER: "sa-deploy@my-project-1567934249798.iam.gserviceaccount.com"
   _RUN_TIME: "python312"
 
 logsBucket: "gs://finance_20250820"
-serviceAccount: "projects/${PROJECT_ID}/serviceAccounts/sa-build@${PROJECT_ID}.iam.gserviceaccount.com"
+serviceAccount: "projects/my-project-1567934249798/serviceAccounts/sa-build@my-project-1567934249798.iam.gserviceaccount.com"
 
 options:
   logging: GCS_ONLY
