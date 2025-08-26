@@ -1,0 +1,28 @@
+steps:
+  - id: "deploy_function"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud functions deploy ${_FUNCTIONS_NAME} \
+          --region=${_REGION} \
+          --source=src/ \
+          --runtime=${_RUN_TIME} \
+          --trigger-http \
+          --project=${PROJECT_ID} \
+          --service-account=${_SERVICE_ACCOUNT_FUNCTIONS} \
+          --build-service-account=projects/${PROJECT_ID}/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
+          --allow-unauthenticated
+
+substitutions:
+  _FUNCTIONS_NAME: "fetch_stock_data"
+  _REGION: "us-central1"
+  _SERVICE_ACCOUNT_FUNCTIONS: "sa-functions@${PROJECT_ID}.iam.gserviceaccount.com"
+  _SERVICE_ACCOUNT_TRIGGER: "sa-deploy@${PROJECT_ID}.iam.gserviceaccount.com"
+  _RUN_TIME: "python312"
+
+logsBucket: "finance_20250820"
+serviceAccount: "projects/${PROJECT_ID}/serviceAccounts/sa-build@${PROJECT_ID}.iam.gserviceaccount.com"
+options:
+  logging: GCS_ONLY
