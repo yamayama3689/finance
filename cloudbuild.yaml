@@ -14,6 +14,7 @@ steps:
           --service-account=${_SERVICE_ACCOUNT_FUNCTIONS} \
           --build-service-account=projects/${PROJECT_ID}/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
           --allow-unauthenticated
+          --entry-point=fetch_stock_financials \
 
 substitutions:
   _FUNCTIONS_NAME: "fetch_stock_financials"
