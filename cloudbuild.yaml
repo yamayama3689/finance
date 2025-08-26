@@ -1,4 +1,4 @@
-steps:
+steps
   - id: "deploy_function"
     name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: bash
@@ -24,5 +24,6 @@ substitutions:
 
 logsBucket: "gs://finance_20250820"
 serviceAccount: "projects/${PROJECT_ID}/serviceAccounts/sa-build@${PROJECT_ID}.iam.gserviceaccount.com"
+
 options:
   logging: GCS_ONLY
