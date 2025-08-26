@@ -12,11 +12,11 @@ steps:
           --trigger-http \
           --project=my-project-1567934249798 \
           --service-account=${_SERVICE_ACCOUNT_FUNCTIONS} \
-          --build-service-account=projects/my-project-1567934249798/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
+          --build-service-account=projects/${PROJECT_ID}/serviceAccounts/${_SERVICE_ACCOUNT_TRIGGER} \
           --allow-unauthenticated
 
 substitutions:
-  _FUNCTIONS_NAME: "fetch_stock_data"
+  _FUNCTIONS_NAME: "fetch_stock_financials"
   _REGION: "us-central1"
   _SERVICE_ACCOUNT_FUNCTIONS: "sa-functions@my-project-1567934249798.iam.gserviceaccount.com"
   _SERVICE_ACCOUNT_TRIGGER: "sa-deploy@my-project-1567934249798.iam.gserviceaccount.com"
