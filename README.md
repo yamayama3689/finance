@@ -1,2 +1,13 @@
 # finance
-翌日の終値を予測するモデルをyfinanceのデータを用いて作成する。
+main.py
+screening.pyでスクリーニングした銘柄の財務情報（利益、cashflow）をdailyで取得しBigQuery上のテーブルに格納する。
+
+cloudbuild.yaml
+githubでpushするたびに、main.pyに書かれた関数をGCP上のCloud Runにデプロイする。
+
+screening.py
+BigQueryのexternal_table_ticker_listという各銘柄のTickerコードが格納されたテーブルから
+Tickerコードのリストを取得し、いくつかの基準（DEratio, ROE, など）の数値基準をもとに有望な銘柄を絞り込む。
+
+stock_price.py
+screening.pyでスクリーニングした銘柄の株価をdailyで取得しBigQuery上のテーブルに格納する。
