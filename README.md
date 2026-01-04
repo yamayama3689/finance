@@ -37,14 +37,3 @@ graph LR
     %% データの流れ（推測）
     Input[(Data Source)] --> C
     C --> Output[(Processed Data)]
-
-mindmap
-  root((srcフォルダ))
-    Execution(実行プログラム)
-        main.py: メインの処理ロジック
-        screening.py: フィルタリングや検証用のサブモジュール
-    Infrastructure(インフラ/構成)
-        cloudbuild.yaml: Google Cloudへのデプロイ・ビルド定義
-        requirements.txt: 必要なライブラリの一覧
-    Documentation(ドキュメント)
-        README.md: プロジェクトの説明書
