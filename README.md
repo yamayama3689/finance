@@ -11,3 +11,14 @@ Tickerコードのリストを取得し、いくつかの基準（DEratio, ROE, 
 
 stock_price.py
 screening.pyでスクリーニングした銘柄の株価をdailyで取得しBigQuery上のテーブルに格納する。
+
+```mermaid
+graph LR
+    subgraph Source
+      A[基幹システム]
+      B[Salesforce]
+    end
+    A --> C[BigQuery/Staging]
+    B --> C
+    C --> D[BigQuery/Mart]
+    D --> E[Looker]
