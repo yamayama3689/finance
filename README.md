@@ -14,26 +14,51 @@ screening.pyでスクリーニングした銘柄の株価をdailyで取得しBig
 
 ## データ処理フロー
 ```mermaid
-graph LR
-    subgraph Local_or_GitHub
-        A[Source Code]
+graph TD
+    %% --- サブグラフ: インフラ/トリガー ---
+    subgraph Trigger [Daily Automation]
+        Scheduler[Cloud Scheduler]
+        CB[cloudbuild.yaml<br/>(Execution Environment)]
     end
 
-    subgraph GCP_CI_CD
-        B[cloudbuild.yaml]
+    %% --- サブグラフ: スクリプト処理 ---
+    subgraph Scripts [Python Scripts]
+        Screening[screening.py<br/>Create Master List]
+        StockPrice[stockprice.py<br/>Fetch Stock Prices]
+        Main[main.py<br/>Fetch Financial Info]
     end
 
-    subgraph Runtime_Execution
-        C{main.py}
-        D[screening.py]
-        E[requirements.txt]
+    %% --- サブグラフ: 外部/ストレージ ---
+    subgraph Data [Data Sources & Storage]
+        Yahoo[Yahoo Finance API]
+        BQ_Excellent[(BigQuery<br/>Table: excellent_firms)]
+        BQ_Final[(BigQuery<br/>Table: final_df)]
     end
 
-    A -->|Push| B
-    B -->|Deploy/Build| C
-    C -->|Import/Module| D
-    E -->|Install Dependencies| C
+    %% --- 処理フロー ---
+    
+    %% 1. マスタ生成プロセス (頻度は任意またはDailyの前段と想定)
+    Screening -->|Analyze Fundamentals| BQ_Excellent
+    
+    %% 2. 日次バッチ処理
+    Scheduler -->|Trigger Daily| CB
+    CB -->|Execute| StockPrice
+    CB -->|Execute| Main
 
-    %% データの流れ（推測）
-    Input[(Data Source)] --> C
-    C --> Output[(Processed Data)]
+    %% 3. データ取得と参照
+    BQ_Excellent -.->|Read Tickers| StockPrice
+    BQ_Excellent -.->|Read Tickers| Main
+    
+    StockPrice -->|Fetch Price| Yahoo
+    Main -->|Fetch Financials| Yahoo
+    
+    %% 4. データ格納
+    Yahoo -->|Write Data| BQ_Final
+    StockPrice -->|Append| BQ_Final
+    Main -->|Append| BQ_Final
+
+    %% --- スタイル ---
+    style Scheduler fill:#EA4335,color:#fff
+    style BQ_Excellent fill:#FBBC04,color:#000
+    style BQ_Final fill:#34A853,color:#fff
+    style CB fill:#4285F4,color:#fff
