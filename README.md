@@ -14,7 +14,6 @@ screening.pyでスクリーニングした銘柄の株価をdailyで取得しBig
 
 ## データ処理フロー
 ```mermaid
-（ここに上記1のコードを貼り付け）
 graph LR
     subgraph Local_or_GitHub
         A[Source Code]
