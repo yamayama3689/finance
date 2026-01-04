@@ -15,42 +15,54 @@ screening.pyでスクリーニングした銘柄の株価をdailyで取得しBig
 ## データ処理フロー
 ```mermaid
 graph TD
-    %% --- サブグラフ: インフラ/トリガー ---
-    subgraph Trigger ["Daily Automation"]
-        Scheduler["Cloud Scheduler"]
-        CB["cloudbuild.yaml<br/>(Execution Environment)"]
+    %% --- ノード定義 ---
+    
+    %% インフラ・トリガー
+    subgraph Trigger ["Automation"]
+        Scheduler["Cloud Scheduler<br/>(Daily Trigger)"]
+        CB["cloudbuild.yaml<br/>(Runner)"]
     end
 
-    %% --- サブグラフ: スクリプト処理 ---
-    subgraph Scripts ["Python Scripts"]
-        Screening["screening.py<br/>(Create Master List)"]
-        StockPrice["stockprice.py<br/>(Fetch Stock Prices)"]
-        Main["main.py<br/>(Fetch Financial Info)"]
+    %% データ処理スクリプト
+    subgraph Processor ["Data Processing (Python)"]
+        S_Stock["stockprice.py<br/>(Fetch Prices)"]
+        S_Main["main.py<br/>(Fetch Financials)"]
+        S_Screening["screening.py<br/>(Update Master)"]
     end
 
-    %% --- サブグラフ: 外部/ストレージ ---
-    subgraph Data ["Data Sources & Storage"]
-        Yahoo["Yahoo Finance API"]
-        BQ_Excellent[("BigQuery<br/>Table: excellent_firms")]
-        BQ_Final[("BigQuery<br/>Table: final_df")]
+    %% データソースと保存先
+    subgraph Storage ["Data Lake / Warehouse"]
+        Yahoo["Yahoo Finance API<br/>(External Source)"]
+        BQ_Master[("BigQuery: excellent_firms<br/>(Ticker Master)")]
+        BQ_Final[("BigQuery: final_df<br/>(Data Mart)")]
     end
 
-    %% --- 処理フロー ---
-    
-    %% 1. マスタ生成 (独立したプロセスとして表現)
-    Screening -->|"Analyze Fundamentals"| BQ_Excellent
-    
-    %% 2. 日次バッチ処理
-    Scheduler -->|"Trigger Daily"| CB
-    CB -->|"Execute"| StockPrice
-    CB -->|"Execute"| Main
+    %% --- データの流れ (Data Flow) ---
 
-    %% 3. データ取得と参照
-    BQ_Excellent -.-|"Read Tickers"| StockPrice
-    BQ_Excellent -.-|"Read Tickers"| Main
-    
-    StockPrice -->|"Fetch Price"| Yahoo
-    Main -->|"Fetch Financials"| Yahoo
-    
-    %% 4. データ格納
-    Yahoo -->|"Write Data"| BQ_Final
+    %% 1. マスタ更新フロー
+    S_Screening -->|"1. 銘柄選定 & 更新"| BQ_Master
+
+    %% 2. 実行トリガー
+    Scheduler -->|"2. 起動"| CB
+    CB -->|"実行"| S_Stock
+    CB -->|"実行"| S_Main
+
+    %% 3. データ取得プロセス (ここを修正)
+    %% マスタから対象Tickerを読み込む
+    BQ_Master -->|"3. 対象Tickerリストの取得"| S_Stock
+    BQ_Master -->|"3. 対象Tickerリストの取得"| S_Main
+
+    %% Yahoo APIからデータを吸い上げる (矢印をYahoo起点に変更)
+    Yahoo -->|"4. 株価データの提供"| S_Stock
+    Yahoo -->|"4. 財務データの提供"| S_Main
+
+    %% 4. データの格納
+    S_Stock -->|"5. データ書き込み"| BQ_Final
+    S_Main -->|"5. データ書き込み"| BQ_Final
+
+    %% --- スタイル調整 ---
+    style Yahoo fill:#E37400,color:#fff
+    style BQ_Master fill:#FBBC04,color:#000
+    style BQ_Final fill:#34A853,color:#fff
+    style S_Stock fill:#4285F4,color:#fff
+    style S_Main fill:#4285F4,color:#fff
