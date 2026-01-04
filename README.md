@@ -18,7 +18,7 @@ graph TD
     %% --- サブグラフ: インフラ/トリガー ---
     subgraph Trigger [Daily Automation]
         Scheduler[Cloud Scheduler]
-        CB[cloudbuild.yaml<br/>(Execution Environment)]
+        CB[cloudbuild.yaml (Execution Environment)]
     end
 
     %% --- サブグラフ: スクリプト処理 ---
