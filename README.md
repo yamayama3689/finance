@@ -23,16 +23,16 @@ graph TD
 
     %% --- サブグラフ: スクリプト処理 ---
     subgraph Scripts [Python Scripts]
-        Screening[screening.py<br/>Create Master List]
-        StockPrice[stockprice.py<br/>Fetch Stock Prices]
-        Main[main.py<br/>Fetch Financial Info]
+        Screening[screening.py Create Master List]
+        StockPrice[stockprice.py Fetch Stock Prices]
+        Main[main.py Fetch Financial Info]
     end
 
     %% --- サブグラフ: 外部/ストレージ ---
     subgraph Data [Data Sources & Storage]
         Yahoo[Yahoo Finance API]
-        BQ_Excellent[(BigQuery<br/>Table: excellent_firms)]
-        BQ_Final[(BigQuery<br/>Table: final_df)]
+        BQ_Excellent[(BigQuery Table: excellent_firms)]
+        BQ_Final[(BigQuery Table: final_df)]
     end
 
     %% --- 処理フロー ---
